@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 typedef struct ChainedHashNode{
     int key;
@@ -58,6 +59,7 @@ int insertChainedHashTable(ChainedHashTable* table, int key, int value){
     return 1;
 }
 
+// Open Addressing - Linear Probing
 int insertProbeHashTable(ProbedHashTable* table, int key, int value){
     for(int i=0; i < table->size; i++){
         int index = (value%(table->size)+i)%(table->size);
@@ -74,6 +76,59 @@ int insertProbeHashTable(ProbedHashTable* table, int key, int value){
     return 0;
 }
 
+// Open Addressing - Quadratic probing
+int insertQuadHashTable(ProbedHashTable* table, int key, int value){
+    double c1=0.5;
+    double c2=0.5;
+    for(int i=0; i < table->size; i++){
+        int index = (int)(value%(table->size)+ (int)(c1*i)+ (int)c2*(pow(i,2)))%(table->size);
+        if(table->array[index]==NULL){
+            table->array[index] = malloc(sizeof(ProbedHashNode));
+            table->array[index]->key=key;
+            table->array[index]->value=value;
+            return 1;
+        } else if (table->array[key]->key == key){
+            return 0;
+        }
+    }
+    // there was hash-collision if not null!
+    return 0;
+}
+
+// Open Addressing - Double hashing
+int insertDoubleHashTable(ProbedHashTable* table, int key, int value){
+    for(int i=0; i < table->size; i++){
+        int index = (value%(table->size)+ i*(10-(value)%(table->size)))%(table->size);
+        if(table->array[index]==NULL){
+            table->array[index] = malloc(sizeof(ProbedHashNode));
+            table->array[index]->key=key;
+            table->array[index]->value=value;
+            return 1;
+        } else if (table->array[key]->key == key){
+            return 0;
+        }
+    }
+    // there was hash-collision if not null!
+    return 0;
+}
+
+// Hashtable exists
+int checkHashTableHelper(ChainedHashTable* table, int key){
+    if(table->array[key]){
+        return key;
+    } else
+        return -1;
+}
+
+int checkHashTable(ChainedHashTable* table, int valueToLookFor){
+    for(int i=0; i < table->N, i++){
+        int left = valueToLookFor-table->array[i]->value;
+        if(checkHashTableHelper(table,left)!=-1){
+            return 1;
+        }
+        insertChainedHashTable(&table,i,valueToLookFor);
+    }
+}
 
 int main() {
     return 0;
